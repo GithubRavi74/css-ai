@@ -1,4 +1,19 @@
+import sys
+try:
+    import cv2
+except ImportError:
+    # If standard cv2 fails, this forces the environment to look for headless
+    import os
+    os.system("pip install opencv-python-headless")
+
 import streamlit as st
+import os
+from ultralytics import YOLO
+
+# ... rest of your code below
+
+
+
 import onnxruntime as ort
 import numpy as np
 import cv2
