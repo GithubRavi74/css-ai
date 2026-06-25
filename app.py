@@ -1,34 +1,45 @@
 import streamlit as st
-import cv2
+import onnxruntime as ort
 import numpy as np
-from detector import PPEDetector
+import cv2
+from PIL import Image
 
-st.set_page_config(page_title="PPE Safety System", layout="wide")
+st.title("PPE Detection - ONNX Runtime")
 
-st.title("🦺 Real-Time PPE Detection System (ONNX)")
+# 1. Load the ONNX session safely using caching
+@st.cache_resource
+def load_onnx_model():
+    # Make sure your exported model is inside a 'models' folder or update this path
+    model_path = "models/best.onnx" 
+    # Force the CPU provider since Streamlit Cloud does not provide a GPU
+    session = ort.InferenceSession(model_path, providers=['CPUExecutionProvider'])
+    return session
 
-detector = PPEDetector("models/best.onnx")
+try:
+    session = load_onnx_model()
+    st.success("ONNX Model loaded successfully!")
+except Exception as e:
+    st.error(f"Failed to load ONNX model: {e}")
 
-run = st.checkbox("Start Camera")
+# 2. Image Uploader
+uploaded_file = st.file_uploader("Upload an image...", type=["jpg", "jpeg", "png"])
 
-FRAME_WINDOW = st.image([])
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_container_width=True)
+    
+    # 3. Preprocessing image for ONNX format
+    # (YOLO ONNX expects scaled float32 arrays, usually structured as [1, 3, 640, 640])
+    img_array = np.array(image.convert("RGB"))
+    img_resized = cv2.resize(img_array, (640, 640))
+    img_normalized = img_resized.astype(np.float32) / 255.0
+    img_transpose = np.transpose(img_normalized, (2, 0, 1)) # HWC to CHW
+    img_input = np.expand_dims(img_transpose, axis=0)       # Add batch dimension [1, 3, 640, 640]
 
-cap = cv2.VideoCapture(0)
-
-while run:
-    ret, frame = cap.read()
-    if not ret:
-        st.error("Camera not accessible")
-        break
-
-    # inference
-    outputs = detector.predict(frame)
-
-    # NOTE: simplified visualization placeholder
-    # (we can refine bounding box decoding later)
-    frame = cv2.putText(frame, "PPE Detection Running...", (50, 50),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
-    FRAME_WINDOW.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-
-cap.release()
+    # 4. Run Inference
+    if st.button("Detect PPE"):
+        input_name = session.get_inputs()[0].name
+        outputs = session.run(None, {input_name: img_input})
+        
+        st.write("Inference complete! Raw Output Shape:", outputs[0].shape)
+        # Add your bounding box parsing logic here based on the output shape
