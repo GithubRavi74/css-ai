@@ -67,7 +67,12 @@ if uploaded_file is not None:
         class_ids = []
         
         # Define your 10 custom PPE class names in their EXACT training order
-        classes = ["Helmet", "Vest", "Goggles", "Gloves", "Boots", "Class6", "Class7", "Class8", "Class9", "Class10"]
+        #classes = ["Helmet", "Vest", "Goggles", "Gloves", "Boots", "Class6", "Class7", "Class8", "Class9", "Class10"]
+        # Replace the old placeholder classes list with this exact one:
+        classes = [
+            'Hardhat', 'Mask', 'NO-Hardhat', 'NO-Mask', 'NO-Safety Vest', 
+            'Person', 'Safety Cone', 'Safety Vest', 'machinery', 'vehicle'
+        ]
 
         # 2. Filter boxes by a confidence threshold
         CONF_THRESHOLD = 0.4
