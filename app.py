@@ -24,7 +24,7 @@ try:
         # Renders the company logo with a clean width constraint
         st.image(logo_img, width=150)
     with col_title:
-        st.title("PPE Detection - AI Site Safety Auditor")
+        st.title("Construction Site Safety Detection - AI Site Safety Auditor")
 except FileNotFoundError:
     # Fallback to a standard title if the image file is missing locally
     st.title("👷‍♂️ Construction Site Safety Detection - AI Site Safety Auditor")
