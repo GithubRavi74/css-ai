@@ -14,7 +14,12 @@ from collections import Counter
 from detector import PPEModel  # Import your backend engine wrapper
 
 st.set_page_config(page_title="AI Safety Auditor", layout="wide")
-st.title("静态/视频 👷‍♂️ PPE Detection - AI Site Safety Auditor")
+st.title("👷‍♂️ PPE Detection - AI Site Safety Auditor")
+
+# --- INITIALIZE SESSION STATE ---
+# This prevents Streamlit from wiping out your results when the video loop ends
+if "video_detections" not in st.session_state:
+    st.session_state.video_detections = None
 
 # Helper function to display the analytics dashboard cleanly
 def show_dashboard(final_detections, violators):
@@ -40,7 +45,7 @@ def show_dashboard(final_detections, violators):
         with col3:
             # Calculate a dynamic compliance percentage
             total_violations = sum(counts[v] for v in violators if v in counts)
-            safety_score = max(0, 100 - (total_violations * 5)) # Scaled softer for multiple frames
+            safety_score = max(0, 100 - (total_violations * 5)) 
             st.metric(label="Site Compliance Score", value=f"{safety_score}%")
 
         # 3. Formatted Business Inventory Breakdowns
@@ -104,6 +109,9 @@ if uploaded_file is not None:
         st.info("🎥 Video file detected. Click the button below to start frame-by-frame analysis.")
         
         if st.button("Run Video AI Analysis"):
+            # Clear previous runs from session state
+            st.session_state.video_detections = None
+            
             # Streamlit uploads files to memory. Save temporarily locally for OpenCV link path
             tfile = tempfile.NamedTemporaryFile(delete=False)
             tfile.write(uploaded_file.read())
@@ -132,7 +140,12 @@ if uploaded_file is not None:
                 video_frame_placeholder.image(annotated_frame_rgb, channels="RGB", use_container_width=True)
             
             cap.release()
-            st.success("🎉 Video Analysis Complete!")
             
-            # Show dashboard report dynamically with all compiled items from video tracking!
-            show_dashboard(all_video_detections, detector.violators)
+            # Save the compiled results into the Session State memory bank!
+            st.session_state.video_detections = all_video_detections
+            st.rerun()  # Forces a clean page refresh to display the dashboard permanently
+
+        # If a video run has completed successfully in this session, render the dashboard
+        if st.session_state.video_detections is not None:
+            st.success("🎉 Video Analysis Complete!")
+            show_dashboard(st.session_state.video_detections, detector.violators)
