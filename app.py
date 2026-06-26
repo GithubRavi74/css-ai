@@ -95,7 +95,7 @@ def load_cached_detector():
 
 try:
     detector = load_cached_detector()
-    st.success("ONNX Model engine loaded cleanly into application cache!")
+    st.success("AI loaded")
 except Exception as e:
     st.error(f"Failed to initialize model wrapper engine: {e}")
 
