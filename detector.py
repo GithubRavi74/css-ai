@@ -25,7 +25,7 @@ class PPEModel:
         return img
 
     #def process_frame(self, orig_frame, conf_threshold=0.40, nms_threshold=0.45):
-      def process_frame(self, orig_frame, conf_threshold=0.38, nms_threshold=0.60):
+    def process_frame(self, orig_frame, conf_threshold=0.38, nms_threshold=0.60):
         """
         Processes a single BGR frame, runs inference, draws boxes, and returns 
         a list of final text detections along with the processed annotated image.
