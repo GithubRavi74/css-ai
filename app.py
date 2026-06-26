@@ -27,7 +27,7 @@ try:
         st.title("PPE Detection - AI Site Safety Auditor")
 except FileNotFoundError:
     # Fallback to a standard title if the image file is missing locally
-    st.title("👷‍♂️ PPE Detection - AI Site Safety Auditor")
+    st.title("👷‍♂️ Construction Site Safety Detection - AI Site Safety Auditor")
     st.warning("Branding Notice: 'IDEA LOGIC Logo.jpg' not found in the root folder.")
 
 # --- INITIALIZE SESSION STATE ---
