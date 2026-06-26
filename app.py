@@ -14,7 +14,21 @@ from collections import Counter
 from detector import PPEModel  # Import your backend engine wrapper
 
 st.set_page_config(page_title="AI Safety Auditor", layout="wide")
-st.title("静态/视频 👷‍♂️ PPE Detection - AI Site Safety Auditor")
+
+# --- BRANDED LOGO HEADER INTEGRATION ---
+# Create columns to place the logo side-by-side with your title or inside the layout cleanly
+try:
+    logo_img = Image.open("IDEA LOGIC Logo.jpg")
+    col_logo, col_title = st.columns([1, 4])  # Sets column width ratio
+    with col_logo:
+        # Renders the company logo with a clean width constraint
+        st.image(logo_img, width=150)
+    with col_title:
+        st.title("PPE Detection - AI Site Safety Auditor")
+except FileNotFoundError:
+    # Fallback to a standard title if the image file is missing locally
+    st.title("👷‍♂️ PPE Detection - AI Site Safety Auditor")
+    st.warning("Branding Notice: 'IDEA LOGIC Logo.jpg' not found in the root folder.")
 
 # --- INITIALIZE SESSION STATE ---
 if "video_detections" not in st.session_state:
@@ -33,7 +47,6 @@ def show_dashboard(final_detections, violators, total_frames):
         raw_counts = Counter(final_detections)
         
         # Calculate the AVERAGE number of objects seen per frame (rounded to nearest whole number)
-        # This converts "total instances across time" into "actual people on screen"
         avg_counts = {item: max(1, round(count / total_frames)) for item, count in raw_counts.items()}
         
         has_violation = any(v in avg_counts for v in violators)
