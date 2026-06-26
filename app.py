@@ -95,7 +95,7 @@ def load_cached_detector():
 
 try:
     detector = load_cached_detector()
-    st.success("AI loaded")
+    st.success("AI succesfully loaded")
 except Exception as e:
     st.error(f"Failed to initialize model wrapper engine: {e}")
 
