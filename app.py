@@ -14,44 +14,53 @@ from collections import Counter
 from detector import PPEModel  # Import your backend engine wrapper
 
 st.set_page_config(page_title="AI Safety Auditor", layout="wide")
-st.title("👷‍♂️ PPE Detection - AI Site Safety Auditor")
+st.title("静态/视频 👷‍♂️ PPE Detection - AI Site Safety Auditor")
 
 # --- INITIALIZE SESSION STATE ---
-# This prevents Streamlit from wiping out your results when the video loop ends
 if "video_detections" not in st.session_state:
     st.session_state.video_detections = None
+if "total_frames" not in st.session_state:
+    st.session_state.total_frames = 0
+if "last_frame" not in st.session_state:
+    st.session_state.last_frame = None
 
 # Helper function to display the analytics dashboard cleanly
-def show_dashboard(final_detections, violators):
+def show_dashboard(final_detections, violators, total_frames):
     st.write("---")
     st.subheader("📊 Executive Safety Analytics Summary")
     
-    if len(final_detections) > 0:
-        counts = Counter(final_detections)
-        has_violation = any(v in counts for v in violators)
+    if len(final_detections) > 0 and total_frames > 0:
+        raw_counts = Counter(final_detections)
+        
+        # Calculate the AVERAGE number of objects seen per frame (rounded to nearest whole number)
+        # This converts "total instances across time" into "actual people on screen"
+        avg_counts = {item: max(1, round(count / total_frames)) for item, count in raw_counts.items()}
+        
+        has_violation = any(v in avg_counts for v in violators)
         
         # 1. Executive Status Header Alert
         if has_violation:
-            st.error("⚠️ **Safety Compliance Alert:** The model detected missing or inadequate PPE on site personnel.")
+            st.error("⚠️ **Safety Compliance Alert:** The model detected ongoing missing or inadequate PPE on site personnel.")
         else:
-            st.success("✅ **Compliance Passed:** All detected site personnel are properly equipped with standard safety gear.")
+            st.success("✅ **Compliance Passed:** Site personnel are consistently equipped with standard safety gear.")
             
-        # 2. Scorecard KPIs
+        # 2. Scorecard KPIs (Using Normalized Averages)
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric(label="Total Objects Spotted", value=len(final_detections))
+            total_avg_objects = sum(avg_counts.values())
+            st.metric(label="Avg Objects Spotted/Frame", value=total_avg_objects)
         with col2:
-            st.metric(label="Workers Spotted (Total Instances)", value=counts.get("Person", 0))
+            st.metric(label="Estimated Workers on Site", value=avg_counts.get("Person", 0))
         with col3:
-            # Calculate a dynamic compliance percentage
-            total_violations = sum(counts[v] for v in violators if v in counts)
-            safety_score = max(0, 100 - (total_violations * 5)) 
+            # Calculate safety score based on averaged violations
+            total_violations = sum(avg_counts[v] for v in violators if v in avg_counts)
+            safety_score = max(0, 100 - (total_violations * 25)) 
             st.metric(label="Site Compliance Score", value=f"{safety_score}%")
 
         # 3. Formatted Business Inventory Breakdowns
-        st.markdown("### 📋 Detailed Inspection Ledger")
+        st.markdown("### 📋 Detailed Inspection Ledger (Averaged Stream Data)")
         report_data = []
-        for item, count in counts.items():
+        for item, count in avg_counts.items():
             if item in violators:
                 status = "🔴 Violation / Risk Factor"
             elif item in ["Hardhat", "Mask", "Safety Vest"]:
@@ -59,7 +68,7 @@ def show_dashboard(final_detections, violators):
             else:
                 status = "🔵 Registered Asset"
                 
-            report_data.append({"Identified Object": item, "Total Instances Seen": count, "Operational Status": status})
+            report_data.append({"Identified Object": item, "Avg Quantity On-Screen": count, "Operational Status": status})
             
         st.table(report_data)
     else:
@@ -84,7 +93,6 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file is not None:
-    # Check file type
     file_extension = uploaded_file.name.split(".")[-1].lower()
     is_video = file_extension in ["mp4", "avi", "mov"]
 
@@ -101,51 +109,64 @@ if uploaded_file is not None:
             annotated_rgb = cv2.cvtColor(annotated_bgr, cv2.COLOR_BGR2RGB)
             st.image(annotated_rgb, caption="Processed Image with Detections", use_container_width=True)
             
-            # Show dashboard report for image
-            show_dashboard(final_detections, detector.violators)
+            # Show dashboard report for image (treated as a 1-frame video)
+            show_dashboard(final_detections, detector.violators, total_frames=1)
             
     else:
         # --- VIDEO PROCESSING PIPELINE ---
         st.info("🎥 Video file detected. Click the button below to start frame-by-frame analysis.")
         
         if st.button("Run Video AI Analysis"):
-            # Clear previous runs from session state
+            # Reset session state on new button clicks
             st.session_state.video_detections = None
+            st.session_state.total_frames = 0
+            st.session_state.last_frame = None
             
-            # Streamlit uploads files to memory. Save temporarily locally for OpenCV link path
             tfile = tempfile.NamedTemporaryFile(delete=False)
             tfile.write(uploaded_file.read())
             
             cap = cv2.VideoCapture(tfile.name)
-            
-            # Create a live placeholder in the UI where frames render sequentially
             video_frame_placeholder = st.empty()
             
             all_video_detections = []
+            frame_count = 0
+            last_processed_rgb = None
             
             # Process frame by frame
             while cap.isOpened():
                 ret, frame = cap.read()
                 if not ret:
-                    break  # Video ends
+                    break  
                 
-                # Use engine to process the frame
+                frame_count += 1
+                
+                # Run ONNX engine frame processing
                 frame_detections, annotated_frame_bgr = detector.process_frame(frame)
                 all_video_detections.extend(frame_detections)
                 
-                # Convert back to RGB format for Streamlit
-                annotated_frame_rgb = cv2.cvtColor(annotated_frame_bgr, cv2.COLOR_BGR2RGB)
-                
-                # Render live video playback frames
-                video_frame_placeholder.image(annotated_frame_rgb, channels="RGB", use_container_width=True)
+                # Convert back to RGB for web browser playback rendering
+                last_processed_rgb = cv2.cvtColor(annotated_frame_bgr, cv2.COLOR_BGR2RGB)
+                video_frame_placeholder.image(last_processed_rgb, channels="RGB", use_container_width=True)
             
             cap.release()
             
-            # Save the compiled results into the Session State memory bank!
+            # Save data AND the final frame image to state memory so it stays on screen
             st.session_state.video_detections = all_video_detections
-            st.rerun()  # Forces a clean page refresh to display the dashboard permanently
+            st.session_state.total_frames = frame_count
+            st.session_state.last_frame = last_processed_rgb
+            st.rerun()  
 
-        # If a video run has completed successfully in this session, render the dashboard
+        # Render step after rerun loop finishes
         if st.session_state.video_detections is not None:
             st.success("🎉 Video Analysis Complete!")
-            show_dashboard(st.session_state.video_detections, detector.violators)
+            
+            # Keep the final frozen annotated snapshot visible on screen
+            if st.session_state.last_frame is not None:
+                st.image(st.session_state.last_frame, caption="Final Video Frame Analysis Snapshot", use_container_width=True)
+                
+            # Render the mathematically normalized dashboard
+            show_dashboard(
+                st.session_state.video_detections, 
+                detector.violators, 
+                st.session_state.total_frames
+            )
