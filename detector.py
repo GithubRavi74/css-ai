@@ -24,7 +24,7 @@ class PPEModel:
         img = np.expand_dims(img, axis=0)   # Add batch dimension
         return img
 
-    # def process_frame(self, orig_frame, conf_threshold=0.40, nms_threshold=0.45):
+    #def process_frame(self, orig_frame, conf_threshold=0.40, nms_threshold=0.45):
       def process_frame(self, orig_frame, conf_threshold=0.38, nms_threshold=0.60):
         """
         Processes a single BGR frame, runs inference, draws boxes, and returns 
