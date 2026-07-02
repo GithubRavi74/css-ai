@@ -21,7 +21,7 @@ try:
     logo_img = Image.open("IDEA LOGIC Logo.jpg")
     
     # 1. Render the logo first (Adjust width to make it as big as you like)
-    st.image(logo_img, width=350)
+    st.image(logo_img, width=250)
     
     # 2. Render the title directly below it
     st.title("AI Construction Site Safety Detection")
