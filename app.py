@@ -16,15 +16,19 @@ from detector import PPEModel  # Import your backend engine wrapper
 st.set_page_config(page_title="AI Safety Auditor", layout="wide")
 
 # --- BRANDED LOGO HEADER INTEGRATION ---
+# --- BRANDED LOGO HEADER INTEGRATION ---
 try:
     logo_img = Image.open("IDEA LOGIC Logo.jpg")
-    col_logo, col_title = st.columns([1, 2])  # Tighter logo bounding column
-    with col_logo:
-        st.image(logo_img, width=300)  # Made logo slightly sleeker
-    with col_title:
-        st.title("AI Construction Site Safety Detection")
+    
+    # 1. Render the logo first (Adjust width to make it as big as you like)
+    st.image(logo_img, width=350)
+    
+    # 2. Render the title directly below it
+    st.title("AI Construction Site Safety Detection")
+    st.write("") # Adds a tiny bit of clean vertical spacing below the title
+
 except FileNotFoundError:
-    st.title("静态/视频 固定 👷‍♂️ Construction Site Safety Detection - AI Site Safety Auditor")
+    st.title("👷‍♂️ Construction Site Safety Detection - AI Site Safety Auditor")
 
 # --- INITIALIZE SESSION STATE ---
 if "video_detections" not in st.session_state:
