@@ -18,9 +18,9 @@ st.set_page_config(page_title="AI Safety Auditor", layout="wide")
 # --- BRANDED LOGO HEADER INTEGRATION ---
 try:
     logo_img = Image.open("IDEA LOGIC Logo.jpg")
-    col_logo, col_title = st.columns([1, 6])  # Tighter logo bounding column
+    col_logo, col_title = st.columns([1, 2])  # Tighter logo bounding column
     with col_logo:
-        st.image(logo_img, width=120)  # Made logo slightly sleeker
+        st.image(logo_img, width=300)  # Made logo slightly sleeker
     with col_title:
         st.title("AI Construction Site Safety Detection")
 except FileNotFoundError:
