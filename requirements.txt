@@ -1,6 +1,5 @@
 streamlit
-onnxruntime
 opencv-python-headless
-ultralytics
+onnxruntime
 numpy
 pillow
