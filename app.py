@@ -62,45 +62,27 @@ def show_dashboard(final_detections, violators, total_frames):
 
         st.markdown("### 📋 Detailed Inspection Ledger (Averaged Stream Data)")
         
-        # 1. Initialize table header structure and CSS styles
-        table_html = """
-        <style>
-            .professional-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 15px 0;
-                font-size: 15px;
-                font-family: sans-serif;
-            }
-            .professional-table thead tr {
-                background-color: #1E293B !important;
-                color: #FFFFFF !important;
-                font-weight: bold;
-            }
-            .professional-table th, .professional-table td {
-                padding: 12px 15px;
-                border: 1px solid #E2E8F0;
-                text-align: center !important;
-            }
-            .professional-table tbody tr {
-                border-bottom: 1px solid #E2E8F0;
-            }
-            .bold-cell {
-                font-weight: bold !important;
-            }
-        </style>
-        <table class="professional-table">
-            <thead>
-                <tr>
-                    <th>Identified Object</th>
-                    <th>Avg Quantity On-Screen</th>
-                    <th>Operational Status</th>
-                </tr>
-            </thead>
-            <tbody>
-        """
+        # 1. Initialize table header structure with strict custom styles (Zero outer margins/spaces)
+        table_html = (
+            "<style>"
+            ".professional-table {width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 15px; font-family: sans-serif;}"
+            ".professional-table thead tr {background-color: #1E293B !important; color: #FFFFFF !important; font-weight: bold;}"
+            ".professional-table th, .professional-table td {padding: 12px 15px; border: 1px solid #E2E8F0; text-align: center !important;}"
+            ".professional-table tbody tr {border-bottom: 1px solid #E2E8F0;}"
+            ".bold-cell {font-weight: bold !important;}"
+            "</style>"
+            "<table class='professional-table'>"
+            "<thead>"
+            "<tr>"
+            "<th>Identified Object</th>"
+            "<th>Avg Quantity On-Screen</th>"
+            "<th>Operational Status</th>"
+            "</tr>"
+            "</thead>"
+            "<tbody>"
+        )
         
-        # 2. Build out rows dynamically as fully structured text chunks
+        # 2. Append rows to flat string to bypass Markdown code indentation rules
         for item, count in avg_counts.items():
             if item in violators:
                 status = "🔴 Violation / Risk Factor"
@@ -109,22 +91,18 @@ def show_dashboard(final_detections, violators, total_frames):
             else:
                 status = "🔵 Registered Asset"
                 
-            row_html = f"""
-                <tr>
-                    <td class="bold-cell">{item}</td>
-                    <td class="bold-cell">{count}</td>
-                    <td>{status}</td>
-                </tr>
-            """
-            table_html += row_html
+            table_html += (
+                "<tr>"
+                f"<td class='bold-cell'>{item}</td>"
+                f"<td class='bold-cell'>{count}</td>"
+                f"<td>{status}</td>"
+                "</tr>"
+            )
             
-        # 3. Securely close out the document nodes
-        table_html += """
-            </tbody>
-        </table>
-        """
+        # 3. Securely close layout brackets
+        table_html += "</tbody></table>"
         
-        # 4. Pass the singular, comprehensive string directly to the layout parser
+        # 4. Execute raw HTML rendering cleanly
         st.markdown(table_html, unsafe_allow_html=True)
     else:
         st.info("Scan clear. No personnel or assets were registered in this file.")
