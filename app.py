@@ -18,7 +18,7 @@ st.set_page_config(page_title="AI Safety Auditor", layout="wide")
 # --- BRANDED LOGO HEADER INTEGRATION ---
 # --- BRANDED LOGO HEADER INTEGRATION ---
 try:
-    logo_img = Image.open("IDEA LOGIC Logo.jpg")
+    logo_img = Image.open("Logo.jpg")
     
     # 1. Render the logo first (Adjust width to make it as big as you like)
     st.image(logo_img, width=250)
