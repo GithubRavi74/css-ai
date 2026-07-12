@@ -16,17 +16,13 @@ from detector import PPEModel  # Import your backend engine wrapper
 st.set_page_config(page_title="AI Safety Auditor", layout="wide")
 
 # --- BRANDED LOGO HEADER INTEGRATION ---
-# --- BRANDED LOGO HEADER INTEGRATION ---
 try:
     logo_img = Image.open("Logo.jpeg")
-    
     # 1. Render the logo first (Adjust width to make it as big as you like)
     st.image(logo_img, width=250)
-    
     # 2. Render the title directly below it
     st.title("AI Construction Site Safety Detection")
     st.write("") # Adds a tiny bit of clean vertical spacing below the title
-
 except FileNotFoundError:
     st.title("👷‍♂️ Construction Site Safety Detection - AI Site Safety Auditor")
 
@@ -38,7 +34,7 @@ if "total_frames" not in st.session_state:
 if "last_frame" not in st.session_state:
     st.session_state.last_frame = None
 
-# Helper function to display the analytics dashboard cleanly
+# --- HELPER FUNCTION FOR THE EXECUTIVE LEDGER & METRICS ---
 def show_dashboard(final_detections, violators, total_frames):
     st.write("---")
     st.subheader("📊 Safety Analytics Summary")
@@ -66,7 +62,7 @@ def show_dashboard(final_detections, violators, total_frames):
 
         st.markdown("### 📋 Detailed Inspection Ledger (Averaged Stream Data)")
         
-        # --- CUSTOM HTML/CSS PROFESSIONAL TABLE GENERATION ---
+        # --- CUSTOM HTML/CSS PROFESSIONAL TABLE ---
         table_html = """
         <style>
             .professional-table {
@@ -86,13 +82,13 @@ def show_dashboard(final_detections, violators, total_frames):
             .professional-table th, .professional-table td {
                 padding: 12px 15px;
                 border: 1px solid #E2E8F0;
-                text-align: center; /* Center align all table columns */
+                text-align: center; /* Center aligns entire column layout */
             }
             .professional-table tbody tr {
                 border-bottom: 1px solid #E2E8F0;
             }
             .professional-table tbody tr:nth-of-type(even) {
-                background-color: rgba(248, 250, 252, 0.05); /* Soft background contrast for dark/light themes */
+                background-color: rgba(248, 250, 252, 0.05); /* Theme-agnostic row tint */
             }
             .bold-cell {
                 font-weight: bold;
@@ -117,7 +113,7 @@ def show_dashboard(final_detections, violators, total_frames):
             else:
                 status = "🔵 Registered Asset"
                 
-            # Inject data into table with targeted classes for centering and bold weights
+            # Injecting explicit bold cell parameters to requested target fields
             table_html += f"""
                 <tr>
                     <td class="bold-cell">{item}</td>
@@ -131,7 +127,6 @@ def show_dashboard(final_detections, violators, total_frames):
         </table>
         """
         
-        # Render the raw generated string safely as HTML
         st.markdown(table_html, unsafe_allow_html=True)
     else:
         st.info("Scan clear. No personnel or assets were registered in this file.")
