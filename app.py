@@ -49,6 +49,22 @@ def show_dashboard(final_detections, violators, total_frames):
         else:
             st.success("✅ **Compliance Passed:** Site personnel are consistently equipped with standard safety gear.")
             
+        # --- GLOBAL METRIC STYLING ENGINE ---
+        # This targeted CSS overrides Streamlit's default tiny font for metric labels
+        st.markdown(
+            """
+            <style>
+                [data-testid="stMetricLabel"] p {
+                    font-size: 18px !important;
+                    font-weight: bold !important;
+                    color: #1E293B !important;
+                    font-family: sans-serif !important;
+                }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
         col1, col2, col3 = st.columns(3)
         with col1:
             total_avg_objects = sum(avg_counts.values())
@@ -62,7 +78,7 @@ def show_dashboard(final_detections, violators, total_frames):
 
         st.markdown("### 📋 Detailed Inspection Ledger (Averaged Stream Data)")
         
-        # 1. Initialize table header structure with strict custom styles (Zero outer margins/spaces)
+        # 1. Initialize table header structure with strict custom styles
         table_html = (
             "<style>"
             ".professional-table {width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 15px; font-family: sans-serif;}"
