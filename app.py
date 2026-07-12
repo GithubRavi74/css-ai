@@ -41,7 +41,7 @@ if "last_frame" not in st.session_state:
 # Helper function to display the analytics dashboard cleanly
 def show_dashboard(final_detections, violators, total_frames):
     st.write("---")
-    st.subheader("📊 Executive Safety Analytics Summary")
+    st.subheader("📊Safety Analytics Summary")
     
     if len(final_detections) > 0 and total_frames > 0:
         raw_counts = Counter(final_detections)
