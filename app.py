@@ -115,7 +115,7 @@ if uploaded_file is not None:
         with img_col1:
             st.subheader("📸 Original View")
             st.image(image, use_container_width=False, width=COMPACT_WIDTH)
-            analyze_clicked = st.button("Analyze Image Compliance", type="primary")
+            analyze_clicked = st.button("Analyze Image with Security Compliance", type="primary")
         
         if analyze_clicked:
             img_array = np.array(image.convert("RGB"))
